@@ -117,7 +117,7 @@
 <body>
     
     <div class="container">
-        <h1>Worker test</h1>
+        <h1>Book Recommender</h1>
         <div class="input-group">
             <input type="text" id="book_name" name="book_name" required placeholder="Enter your favorite book...">
         </div>
@@ -140,15 +140,61 @@
 
     </div>
     <py-script config='{"packages":["numpy", "pandas", "scikit-learn"]}'>
-        from pyscript import PyWorker
+        import warnings
+        # filter out pyarrow requirement warning (pyarrow is not ported to pyscript)
+        warnings.filterwarnings('ignore')
+
+        from pyweb import pydom
+        from pyscript import document
         from pyscript import display
-        
-        def hello():
-            display("hello")
+        import pandas as pd
+        import difflib
+        from pyodide.http import open_url
 
-        worker = PyWorker("worker.py", type="micropython")
-        worker.sync.hello = hello
+        text_box_content = pydom["#book_name"]
 
+        recommendation_template = pydom.Element(document.querySelector("#recommendation-template").content.querySelector(".query-main"))
+
+        url_content = open_url("https://raw.githubusercontent.com/aanokh/Summer_Project/77ea6ed11e2d754d8e0a1a8b5ea130daa8627076/Book_Details.csv")
+        book_data = pd.read_csv(url_content)
+        book_data = book_data.reset_index()
+
+        def button_pressed(event):
+            if not text_box_content.value:
+                return None
+            
+            index = find_recommended_index()
+
+            pydom["div#result_message"].html = "<h2>Books suggested for you:</h2>"
+            pydom["#recommendations-list"].html = ""
+
+            display_recommended_book(index)
+
+        def find_recommended_index():
+
+            book_name = text_box_content.value[0]
+
+            list_of_all_titles = book_data['book_title'].tolist()
+            
+            find_close_match = difflib.get_close_matches(book_name, list_of_all_titles)
+            
+            close_match = find_close_match[0]
+
+            index_of_the_book = book_data[book_data.book_title == close_match]['index'].values[0]
+
+            return index_of_the_book
+
+        def display_recommended_book(index):
+            book_info = book_data.loc[index]
+
+            recommendation_html = recommendation_template.clone()
+            recommendation_html.id = "book-index-" + str(index)
+
+            recommendation_html._js.querySelector(".query-title").textContent = book_info["book_title"]
+            recommendation_html._js.querySelector(".query-author").textContent = book_info["author"]
+            recommendation_html._js.querySelector(".query-published").textContent = book_info["publication_info"]
+
+            pydom["#recommendations-list"][0].append(recommendation_html)
     </py-script>
 </body>
 </html>
