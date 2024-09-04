@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Recommender</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.6.2/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.6.2/core.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            width: 100%;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .input-group input[type="text"]:focus {
+            border-color: #007bff;
+        }
+        .input-group input[type="text"]::placeholder {
+            color: #aaa;
+        }
+        button[type="submit"] {
+            padding: 12px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .recommendation {
+            display: flex;
+            align-items: center;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .recommendation:hover {
+            transform: translateY(-5px);
+        }
+        .recommendation img {
+            max-width: 120px;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+        .recommendation div {
+            flex: 1;
+        }
+        .recommendation h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .recommendation p {
+            margin: 0;
+            color: #666;
+        }
+        .recommendation p strong {
+            color: #333;
+        }
+        .message {
+            text-align: left;
+            color: #666;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <h1>Book Recommender</h1>
+        <div class="input-group">
+            <input type="text" id="book_name" name="book_name" required placeholder="Enter your favorite book...">
+        </div>
+        <button type="submit" py-click="button_pressed">Get Recommendations</button>
+
+        <div class="message" id="result_message"></div>
+
+        <div id="recommendations-list">
+
+        <template id = "recommendation-template">
+            <div class="query-main recommendation">
+                <img src="{{ recommendation.cover_image_uri }}" alt="{{ recommendation.title }}">
+                <div>
+                    <h3 class="query-title">Placeholder Title</h3>
+                    <p><strong>Author:</strong> <span class="query-author">Placeholder Author</span></p>
+                    <p><strong>Published:</strong> <span class="query-published">Placeholder Published</span></p>
+                </div>
+            </div>
+        </template>
+
+    </div>
+    <py-script config='{"packages":["numpy", "pandas", "scikit-learn"]}'>
+        import warnings
+        # filter out pyarrow requirement warning (pyarrow is not ported to pyscript)
+        warnings.filterwarnings('ignore')
+
+        from pyweb import pydom
+        from pyscript import document
+        from pyscript import display
+        import pandas as pd
+        import difflib
+        from pyodide.http import open_url
+
+        text_box_content = pydom["#book_name"]
+
+        recommendation_template = pydom.Element(document.querySelector("#recommendation-template").content.querySelector(".query-main"))
+
+        url_content = open_url("https://raw.githubusercontent.com/aanokh/Summer_Project/77ea6ed11e2d754d8e0a1a8b5ea130daa8627076/Book_Details.csv")
+        book_data = pd.read_csv(url_content)
+        book_data = book_data.reset_index()
+
+        def button_pressed(event):
+            if not text_box_content.value:
+                return None
+            
+            index = find_recommended_index()
+
+            pydom["div#result_message"].html = "<h2>Books suggested for you:</h2>"
+            pydom["#recommendations-list"].html = ""
+
+            display_recommended_book(index)
+
+        def find_recommended_index():
+
+            book_name = text_box_content.value[0]
+
+            list_of_all_titles = book_data['book_title'].tolist()
+            
+            find_close_match = difflib.get_close_matches(book_name, list_of_all_titles)
+            
+            close_match = find_close_match[0]
+
+            index_of_the_book = book_data[book_data.book_title == close_match]['index'].values[0]
+
+            return index_of_the_book
+
+        def display_recommended_book(index):
+            book_info = book_data.loc[index]
+
+            recommendation_html = recommendation_template.clone()
+            recommendation_html.id = "book-index-" + str(index)
+
+            recommendation_html._js.querySelector(".query-title").textContent = book_info["book_title"]
+            recommendation_html._js.querySelector(".query-author").textContent = book_info["author"]
+            recommendation_html._js.querySelector(".query-published").textContent = book_info["publication_info"]
+
+            pydom["#recommendations-list"][0].append(recommendation_html)
+    </py-script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyScript Example</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.6.2/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.6.2/core.js"></script>
+</head>
+<body>
+    <button id="hello_button" py-click="hello_button">Say Hello</button>
+    <div id="output"></div>
+    <py-script>
+        from pyweb import pydom
+        def hello_button(event):
+            pydom["div#output"].html = "<h1>Hello there!</h1>"
+
+    </py-script>
+</body>
+</html>
