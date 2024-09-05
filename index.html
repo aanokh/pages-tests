@@ -113,6 +113,25 @@
             color: #666;
             margin-bottom: 20px;
         }
+
+        .loader_wrapper {
+            text-align: center;
+        }
+
+        .loader {
+            border: 12px solid #f3f3f3; /* Light grey */
+            border-top: 12px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.5s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -125,8 +144,14 @@
         <button type="submit" py-click="button_pressed">Get Recommendations</button>
 
         <div class="message" id="result_message"></div>
+        
+        <p id="testhelo">helo</p>
 
-        <div id="recommendations-list">
+        <div class="loader_wrapper">
+            <div class="loader" id="load_throbber"></div>
+        </div>
+
+        <div id="recommendations-list"></div>
 
         <template id = "recommendation-template">
             <div class="query-main recommendation">
@@ -141,9 +166,13 @@
 
     </div>
     <py-script config='{"packages":["numpy", "pandas", "scikit-learn"]}'>
+        from pyweb import pydom
         from pyscript import PyWorker
         from pyscript import display
         
+        def button_pressed(event):
+            pydom["div#load_throbber"].style["display"] = "inline-block"
+
         def hello():
             display("hello")
 
