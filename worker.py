@@ -1,6 +1,8 @@
 from pyscript import sync
 
 def load_data():
+    sync.hello()
+
     import warnings
     # filter out pyarrow requirement warning (pyarrow is not ported to pyscript)
     warnings.filterwarnings('ignore')
