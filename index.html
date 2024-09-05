@@ -178,6 +178,7 @@
 
         worker = PyWorker("worker.py", type="micropython")
         worker.sync.hello = hello
+        worker.load_data()
 
     </py-script>
 </body>
