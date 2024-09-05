@@ -3,9 +3,9 @@ from pyscript import sync
 def load_data():
     sync.hello()
 
-    import warnings
+    #import warnings
     # filter out pyarrow requirement warning (pyarrow is not ported to pyscript)
-    warnings.filterwarnings('ignore')
+    #warnings.filterwarnings('ignore')
     
     global pd
     if "pd" not in globals():
