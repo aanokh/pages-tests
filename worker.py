@@ -30,4 +30,5 @@ def load_data():
     book_data = book_data.reset_index()
 
     sync.hello()
-    
+
+load_data()
