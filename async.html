@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="mini-coi.js" scope="./"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Recommender</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.6.2/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.6.2/core.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            width: 100%;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .input-group input[type="text"]:focus {
+            border-color: #007bff;
+        }
+        .input-group input[type="text"]::placeholder {
+            color: #aaa;
+        }
+        button[type="submit"] {
+            padding: 12px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .recommendation {
+            display: flex;
+            align-items: center;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .recommendation:hover {
+            transform: translateY(-5px);
+        }
+        .recommendation img {
+            max-width: 120px;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+        .recommendation div {
+            flex: 1;
+        }
+        .recommendation h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .recommendation p {
+            margin: 0;
+            color: #666;
+        }
+        .recommendation p strong {
+            color: #333;
+        }
+        .message {
+            text-align: left;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .loader_wrapper {
+            text-align: center;
+        }
+
+        .loader {
+            border: 12px solid #f3f3f3; /* Light grey */
+            border-top: 12px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.5s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <h1>Worker test</h1>
+        <div class="input-group">
+            <input type="text" id="book_name" name="book_name" required placeholder="Enter your favorite book...">
+        </div>
+        <button type="submit" py-click="button_pressed">Get Recommendations</button>
+
+        <div class="message" id="result_message"></div>
+        
+        <p id="testhelo">helo</p>
+
+        <div class="loader_wrapper">
+            <div class="loader" id="load_throbber"></div>
+        </div>
+
+        <div id="recommendations-list"></div>
+
+        <template id = "recommendation-template">
+            <div class="query-main recommendation">
+                <img src="{{ recommendation.cover_image_uri }}" alt="{{ recommendation.title }}">
+                <div>
+                    <h3 class="query-title">Placeholder Title</h3>
+                    <p><strong>Author:</strong> <span class="query-author">Placeholder Author</span></p>
+                    <p><strong>Published:</strong> <span class="query-published">Placeholder Published</span></p>
+                </div>
+            </div>
+        </template>
+
+    </div>
+    <py-script>
+        from pyweb import pydom
+        from pyscript import display
+        import asyncio
+        import pyodide
+        
+        async def load_data():
+            await pyodide.loadPackage("micropip")
+            await display("finished")
+
+        def button_pressed(event):
+            pydom["div#load_throbber"].style["display"] = "inline-block"
+
+        def hello():
+            display("hello")
+
+        display("started")
+        asyncio.create_task(load_data())
+    </py-script>
+</body>
+</html>
