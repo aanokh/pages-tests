@@ -222,12 +222,14 @@
         def button_pressed(event):
             if not text_box_content.value[0]:
                 pydom["div#result_message"].html = "<h2>Please enter a value.</h2>"
+                pydom["div#recommendations-list"].html = ""
                 return None
 
             index = selected_book_index()
 
             if index == None:
                 pydom["div#result_message"].html = "<h2>Match not found.</h2>"
+                pydom["div#recommendations-list"].html = ""
                 return None
             
             top_books = get_top_books(index)
