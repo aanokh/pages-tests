@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="mini-coi.js" scope="./"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Recommender</title>
@@ -112,20 +113,45 @@
             color: #666;
             margin-bottom: 20px;
         }
+
+        .loader_wrapper {
+            text-align: center;
+        }
+
+        .loader {
+            border: 12px solid #f3f3f3; /* Light grey */
+            border-top: 12px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.5s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     
     <div class="container">
-        <h1>Book Recommender</h1>
+        <h1>Worker test</h1>
         <div class="input-group">
             <input type="text" id="book_name" name="book_name" required placeholder="Enter your favorite book...">
         </div>
         <button type="submit" py-click="button_pressed">Get Recommendations</button>
 
         <div class="message" id="result_message"></div>
+        
+        <p id="testhelo">helo</p>
 
-        <div id="recommendations-list">
+        <div class="loader_wrapper">
+            <div class="loader" id="load_throbber"></div>
+        </div>
+
+        <div id="recommendations-list"></div>
 
         <template id = "recommendation-template">
             <div class="query-main recommendation">
@@ -139,62 +165,44 @@
         </template>
 
     </div>
-    <py-script config='{"packages":["numpy", "pandas", "scikit-learn"]}'>
+    <py-script config='{"packages":["micropip"]}'>
+        from pyweb import pydom
+        from pyscript import display
+        import asyncio
+        import time
         import warnings
+        import micropip
         # filter out pyarrow requirement warning (pyarrow is not ported to pyscript)
         warnings.filterwarnings('ignore')
+        
+        async def load_data():
+            try:
+                await micropip.install("numpy")
+                await micropip.install("scikit-learn")
+                await micropip.install("pandas")
 
-        from pyweb import pydom
-        from pyscript import document
-        from pyscript import display
-        import pandas as pd
-        import difflib
-        from pyodide.http import open_url
+                print("installed")
 
-        text_box_content = pydom["#book_name"]
+                sklearn = await asyncio.to_thread(lambda: __import__('sklearn'))
+                
+                print("imported")
 
-        recommendation_template = pydom.Element(document.querySelector("#recommendation-template").content.querySelector(".query-main"))
-
-        url_content = open_url("https://raw.githubusercontent.com/aanokh/Summer_Project/77ea6ed11e2d754d8e0a1a8b5ea130daa8627076/Book_Details.csv")
-        book_data = pd.read_csv(url_content)
-        book_data = book_data.reset_index()
+                #url_content = open_url("https://raw.githubusercontent.com/aanokh/Summer_Project/77ea6ed11e2d754d8e0a1a8b5ea130daa8627076/Book_Details.csv")
+                #book_data = pd.read_csv(url_content)
+                #book_data = book_data.reset_index()
+                #await print(book_data.head())
+            except Exception as e:
+                print(e)
 
         def button_pressed(event):
-            if not text_box_content.value:
-                return None
-            
-            index = find_recommended_index()
+            pydom["div#load_throbber"].style["display"] = "inline-block"
 
-            pydom["div#result_message"].html = "<h2>Books suggested for you:</h2>"
-            pydom["div#recommendations-list"].html = ""
+        def hello():
+            display("hello")
 
-            display_recommended_book(index)
-
-        def find_recommended_index():
-
-            book_name = text_box_content.value[0]
-
-            list_of_all_titles = book_data['book_title'].tolist()
-            
-            find_close_match = difflib.get_close_matches(book_name, list_of_all_titles)
-            
-            close_match = find_close_match[0]
-
-            index_of_the_book = book_data[book_data.book_title == close_match]['index'].values[0]
-
-            return index_of_the_book
-
-        def display_recommended_book(index):
-            book_info = book_data.loc[index]
-
-            recommendation_html = recommendation_template.clone()
-            recommendation_html.id = "book-index-" + str(index)
-
-            recommendation_html._js.querySelector(".query-title").textContent = book_info["book_title"]
-            recommendation_html._js.querySelector(".query-author").textContent = book_info["author"]
-            recommendation_html._js.querySelector(".query-published").textContent = book_info["publication_info"]
-
-            pydom["#recommendations-list"][0].append(recommendation_html)
+        print("started ooga booga 3")
+        asyncio.create_task(load_data())
+        
     </py-script>
 </body>
 </html>
