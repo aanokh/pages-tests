@@ -220,10 +220,16 @@
 
 
         def button_pressed(event):
-            if not text_box_content.value:
+            if not text_box_content.value[0]:
+                pydom["div#result_message"].html = "<h2>Please enter a value.</h2>"
+                return None
+
+            index = selected_book_index()
+
+            if index == None:
+                pydom["div#result_message"].html = "<h2>Match not found.</h2>"
                 return None
             
-            index = selected_book_index()
             top_books = get_top_books(index)
 
             pydom["div#result_message"].html = "<h2>Books suggested for you:</h2>"
@@ -236,13 +242,15 @@
             book_name = text_box_content.value[0]
             list_of_all_titles = book_data['book_title'].tolist()
             find_close_match = difflib.get_close_matches(book_name, list_of_all_titles)
+            if not find_close_match:
+                return None
             close_match = find_close_match[0]
+            book_info = book_data[book_data.book_title == close_match]['index']
             index_of_the_book = book_data[book_data.book_title == close_match]['index'].values[0]
             return index_of_the_book
 
         def get_top_books(index_of_the_book):
             similarity_list = cosine_similarity(feature_vectors, feature_vectors[index_of_the_book])
-            display("Similarity Calculated")
             similarity = pd.DataFrame(similarity_list)
             similarity = similarity.rename(columns={similarity.columns[0]: "score"})
             similarity = similarity.sort_values(by="score", ascending=False)
