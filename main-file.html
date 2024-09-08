@@ -174,7 +174,7 @@
 
         <template id = "recommendation-template">
             <div class="query-main recommendation">
-                <img class="query-image" alt="Book Image">
+                <img src="{{ recommendation.cover_image_uri }}" alt="{{ recommendation.title }}">
                 <div>
                     <h3 class="query-title">Placeholder Title</h3>
                     <p><strong>Author:</strong> <span class="query-author">Placeholder Author</span></p>
@@ -258,7 +258,6 @@
             recommendation_html._js.querySelector(".query-title").textContent = book_info["book_title"]
             recommendation_html._js.querySelector(".query-author").textContent = book_info["author"]
             recommendation_html._js.querySelector(".query-published").textContent = book_info["publication_info"]
-            recommendation_html._js.querySelector(".query-image").src = book_info["cover_image_uri"]
 
             pydom["#recommendations-list"][0].append(recommendation_html)
     </py-script>
