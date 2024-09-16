@@ -217,8 +217,6 @@
         vectorizer = TfidfVectorizer()
         feature_vectors = vectorizer.fit_transform(combined_features)
 
-
-
         def button_pressed(event):
             if not text_box_content.value[0]:
                 pydom["div#result_message"].html = "<h2>Please enter a value.</h2>"
